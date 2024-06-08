@@ -23,7 +23,7 @@ export class AuthService {
 
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync({
-        sub: userId,
+        id: userId,
         email,
       }, {
         expiresIn: 60 * 15,
@@ -31,11 +31,11 @@ export class AuthService {
       }
       ),
       this.jwtService.signAsync({
-        sub: userId,
+        id: userId,
         email,
       }, {
         expiresIn: 60 * 60 * 24 * 7,
-        secret: "rt- secret"
+        secret: "rt-secret"
       }
       )
     ])
@@ -118,7 +118,32 @@ export class AuthService {
       }
     })
   }
-  async refreshToken() {
+  async refreshToken(
+    userId: number, rt: string
+  ) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
+
+    if (!user) {
+      throw new ForbiddenException("Access Denied")
+    }
+    const rtMatches = await Bcrypt.compare(rt, user.hashedat)
+    if (!rtMatches)
+      throw new ForbiddenException("Access Denied")
+
+    const tokens = await this.getTokens(
+      user.id,
+      user.email
+    )
+    await this.updateHash(
+      user.id,
+      tokens.refresh_token
+    )
+    return tokens
+
 
   }
 }

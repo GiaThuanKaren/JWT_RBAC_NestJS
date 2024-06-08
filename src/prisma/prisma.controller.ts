@@ -3,12 +3,13 @@ import { PrismaService } from './prisma.service';
 import { CreatePrismaDto } from './dto/create-prisma.dto';
 import { UpdatePrismaDto } from './dto/update-prisma.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { Tokens } from 'src/auth/types';
 
 @Controller('prisma')
 @ApiTags("Prisma ")
 
 export class PrismaController {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
 
   @Post()
   create(@Body() createPrismaDto: CreatePrismaDto) {
